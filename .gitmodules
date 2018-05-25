@@ -13,3 +13,9 @@
 [submodule "obelisk-https"]
 	path = obelisk-https
 	url = git@github.com:obsidiansystems/obelisk-https
+[submodule "obelisk-example"]
+	path = obelisk-example
+	url = git@github.com:obsidiansystems/obelisk-example.git
+[submodule "obelisk-snap"]
+	path = obelisk-snap
+	url = git@github.com:obsidiansystems/obelisk-snap.git
