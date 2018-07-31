@@ -256,6 +256,7 @@ rec {
                           , packages ? {}
                           , overrides ? _: _: {}
                           , tools ? _: []
+                          , shellToolOverrides ? _: _: {}
                           }:
               let frontendName = "frontend";
                   backendName = "backend";
@@ -275,7 +276,7 @@ rec {
                   };
                   totalOverrides = composeExtensions (composeExtensions defaultHaskellOverrides projectOverrides) overrides;
               in {
-                inherit tools;
+                inherit shellToolOverrides tools;
                 overrides = totalOverrides;
                 packages = combinedPackages;
                 shells = {
