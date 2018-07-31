@@ -255,6 +255,7 @@ rec {
                           , ios ? null #TODO: Better error when missing
                           , packages ? {}
                           , overrides ? _: _: {}
+                          , tools ? _: []
                           }:
               let frontendName = "frontend";
                   backendName = "backend";
@@ -274,6 +275,7 @@ rec {
                   };
                   totalOverrides = composeExtensions (composeExtensions defaultHaskellOverrides projectOverrides) overrides;
               in {
+                inherit tools;
                 overrides = totalOverrides;
                 packages = combinedPackages;
                 shells = {
