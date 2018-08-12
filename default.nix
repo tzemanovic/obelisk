@@ -57,17 +57,28 @@ let
       obelisk-command = addOptparseApplicativeCompletionScripts "ob" (justStaticExecutables' super.obelisk-command);
 
       optparse-applicative = self.callHackage "optparse-applicative" "0.14.0.0" {};
+
+      Cabal = self.callHackage "Cabal" "2.0.0.2" {};
     });
   };
 
   fixUpstreamPkgs = self: super: {
-    algebraic-graphs = pkgs.haskell.lib.doJailbreak
+    megaparsec = self.callHackage "megaparsec" "6.0.0" {};
+    modern-uri = pkgs.haskell.lib.dontCheck super.modern-uri;
+    github = pkgs.haskell.lib.doJailbreak (self.callCabal2nix "github" (pkgs.fetchFromGitHub {
+      owner = "phadej";
+      repo = "github";
+      rev = "v0.19";
+      sha256 = "0gzqhpvgab9j0v5647m65d3jjy8kdlwaqyr5pc2hjyc0w8gvgcak";
+    }) {});
+
+    algebraic-graphs = pkgs.haskell.lib.dontCheck (pkgs.haskell.lib.doJailbreak
       (self.callCabal2nix "algebraic-graphs" (pkgs.fetchFromGitHub {
         owner = "snowleopard";
         repo = "alga";
         rev = "480a73137e9b38ad3f1bc2c628847953d2fb3e25";
         sha256 = "0dpwi5ffs88brl3lz51bwb004c6zm8ds8pkw1vzsg2a6aaiyhlzl";
-      }) {});
+      }) {}));
 
     monoidal-containers =
       let src = pkgs.fetchFromGitHub {
@@ -185,11 +196,11 @@ rec {
       set -eux
       ln -s "${justStaticExecutables backend}"/bin/* $out/
       ln -s "${mkAssets assets}" $out/static.assets
-      ln -s "${config}" $out/config
+      cp -r ${config} $out/config
       ln -s ${mkAssets (compressedJs frontend)} $out/frontend.jsexe.assets
     '';
 
-  server = { exe, hostName, adminEmail, routeHost, enableHttps }:
+  server = { exe, hostName, adminEmail, routeHost, enableHttps, ... }:
     let system = "x86_64-linux";
         nixos = import (pkgs.path + /nixos);
         backendPort = 8000;
@@ -302,15 +313,15 @@ rec {
                 };
               };
           in mkProject (projectDefinition args));
-      serverOn = sys: serverExe (projectOut sys).ghc.backend (projectOut system).ghcjs.frontend static configPath;
-      linuxExe = serverOn "x86_64-linux";
-    in projectOut system // {
-      inherit linuxExe;
+      serverOn = sys: config: serverExe (projectOut sys).ghc.backend (projectOut system).ghcjs.frontend static config;
       # `exe` is project's backend executable, with frontend assets, config, etc.
       # `linuxExe` is the same but built for x86_64-linux.
-      exe = serverOn system;
-      server = args@{ hostName, adminEmail, routeHost, enableHttps }:
-        server (args // { exe = linuxExe;});
+      exe = serverOn system configPath;
+      linuxExe = serverOn "x86_64-linux" configPath;
+    in projectOut system // {
+      inherit exe linuxExe;
+      server = args@{ hostName, adminEmail, routeHost, enableHttps, config }:
+        server (args // { exe = serverOn "x86_64-linux" config;});
       obelisk = import (base + "/.obelisk/impl") {};
     };
   haskellPackageSets = {

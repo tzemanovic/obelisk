@@ -30,3 +30,4 @@ executable backend
                , obelisk-executable-config
                , obelisk-executable-config-inject
                , text
+  ghc-options: -threaded

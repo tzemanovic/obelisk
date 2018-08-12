@@ -43,6 +43,8 @@ import Reflex.Dom.Core
 import Reflex.Host.Class
 import qualified Reflex.TriggerEvent.Base as TriggerEvent
 
+import Data.Semigroup hiding (Sum)
+
 makePrisms ''Sum
 
 type ObeliskWidget t x route m =

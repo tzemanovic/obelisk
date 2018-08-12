@@ -23,6 +23,7 @@ import System.Process (delegate_ctlc, env, proc)
 import Text.URI (URI)
 import qualified Text.URI as URI
 import Text.URI.Lens
+import Data.Monoid ((<>))
 
 import Obelisk.App (MonadObelisk)
 import Obelisk.CliApp (Severity (..), callProcessAndLogOutput, failWith, putLog, withSpinner)
@@ -101,6 +102,7 @@ deployPush deployPath getNixBuilders = do
             , strArg "adminEmail" adminEmail
             , strArg "routeHost" routeHost
             , boolArg "enableHttps" enableHttps
+            , rawArg "config" $ deployPath </> "config"
             ]
           , _nixBuildConfig_builders = builders
           }
